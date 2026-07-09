@@ -4,7 +4,7 @@ Browse primary/elementary **micro-topics** in learning order, read short tutoria
 
 This project packages a static learning site on top of the open [Marble Skill Taxonomy](https://github.com/withmarbleapp/os-taxonomy) dataset (1,590 topics, prerequisite graph, curriculum alignment).
 
-The **hosted website**, **AI lesson/quiz generation**, and **personalized lessons for your child** were created by [Kei Sakai](https://kunani.dev) ([@KeiSakaiX](https://x.com/KeiSakaiX)).
+The **hosted website**, **AI lesson/quiz generation**, and **personalized lessons for your child** were created by [Kei Sakai](https://kunani.dev) ([@KeiSakaiX](https://x.com/KeiSakaiX)). Hosted static site: **[https://budezllc.github.io/os-taxonomy/](https://budezllc.github.io/os-taxonomy/)**
 
 ## Features
 
@@ -17,6 +17,8 @@ The **hosted website**, **AI lesson/quiz generation**, and **personalized lesson
 The hosted GitHub Pages site serves pre-generated **standard** lessons. Full AI generation and personalization run when you use the app locally.
 
 ## Hosted site (GitHub Pages)
+
+Live site: **[https://budezllc.github.io/os-taxonomy/](https://budezllc.github.io/os-taxonomy/)**
 
 The public site is a **static** export — no server, no accounts, no API keys:
 
@@ -40,9 +42,9 @@ Do **not** commit `web/data/lessons-cache-personalized.json` (gitignored). It ca
 
 Locally you get Settings, Pregenerate, and Generate/Regenerate so an AI agent can create or refresh lessons and quizzes. Keys stay in the browser (`localStorage`) — never in env files or the repo.
 
-1. Open **Settings → Learner profile** — child’s name, pets, and interests  
-2. Choose **Lesson cache → Personalized** for child-specific lessons, or **Standard** for the public cache  
-3. Generate one lesson, or use **Pregenerate** to batch the curriculum  
+1. Open **Settings → Learner profile** — child’s name, pets, and interests
+2. Choose **Lesson cache → Personalized** for child-specific lessons, or **Standard** for the public cache
+3. Generate one lesson, or use **Pregenerate** to batch the curriculum
 
 ```bash
 cd web
