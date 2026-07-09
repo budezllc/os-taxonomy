@@ -1,125 +1,104 @@
-# Marble Skill Taxonomy
+# Micro Lessons
 
-An open, structured taxonomy of **what children learn** across the primary/elementary years — decomposed into fine-grained "micro-topics", wired into a prerequisite graph, and aligned to national curriculum standards. Produced by [Marble](https://withmarble.com).
+Browse primary/elementary **micro-topics** in learning order, read short tutorials, take quizzes, and track progress in your browser.
 
-> **Version:** `v1` · **Topics:** 1,590 · **Prerequisite edges:** 3,221 · **Subjects:** 8
+This project packages a static learning site on top of the open [Marble Skill Taxonomy](https://github.com/withmarbleapp/os-taxonomy) dataset (1,590 topics, prerequisite graph, curriculum alignment).
 
-## See it
+The **hosted website**, **AI lesson/quiz generation**, and **personalized lessons for your child** were created by [Kei Sakai](https://kunani.dev) ([@KeiSakaiX](https://x.com/KeiSakaiX)).
 
-![The taxonomy as a rotating 3D graph: every dot a micro-topic, colored by subject, wired by prerequisites](media/curriculum-viz.gif)
+## Features
 
-Every dot is a micro-topic, colored by subject; height is age; each thread is a prerequisite ([full-quality video](media/curriculum-viz.mp4)). Explore it interactively at [withmarble.com/curriculum](https://withmarble.com/curriculum) — tap any concept to trace everything a learner must master before it.
+- **Curriculum path** — topics ordered by age and hard prerequisites so kids unlock the next idea when they’re ready
+- **AI-generated lessons & quizzes** — locally, an AI agent writes a short read-aloud tutorial plus a quick quiz for each micro-topic (OpenAI-compatible APIs: LM Studio, Ollama, OpenAI, etc.)
+- **Personalized for your child** — in Settings, add their **name**, **interests** (cookies, Roblox, sewing…), and **pets** (name + type). When you generate in **Personalized** mode, lessons weave those in naturally — addressing them by name, using pet names in examples, and tying ideas to what they already love — for fully personalized lessons for your child
+- **Two lesson caches** — **Standard** (generic, ships to GitHub Pages) vs **Personalized** (local only, gitignored; never published)
+- **Progress in the browser** — mark complete, export/import JSON; no accounts required
 
+The hosted GitHub Pages site serves pre-generated **standard** lessons. Full AI generation and personalization run when you use the app locally.
 
-## What this is
+## Hosted site (GitHub Pages)
 
-Most curriculum data is either a flat list of standards or locked inside a product. This dataset is a **connected graph of learning**:
+The public site is a **static** export — no server, no accounts, no API keys:
 
-- **1,590 micro-topics** — a single, teachable idea (e.g. *"Building sentences"*, *"Apparent brightness of stars"*), each with a plain-language description, mastery **evidence** criteria, a type (conceptual / procedural / representational / language / meta), a subject + domain, and an approximate age range.
-- **3,221 prerequisite dependencies** — a directed acyclic graph: *"topic X depends on prerequisite Y"*, each edge tagged `hard`/`soft` and carrying a one-line **reason**.
-- **Curriculum alignment** — each micro-topic links to the standards it was distilled from (NGSS, Common Core, the UK National Curriculum, and more).
-- **Domain clusters** — 183 parent-friendly one-paragraph summaries per (subject, domain, age band).
+- Browse and filter topics; open pre-generated lessons and quizzes
+- Mark lessons complete — progress stays in **your browser** (`localStorage`)
+- **Export / Import** progress JSON to move between devices
+- Generation UI (Settings, Pregenerate) is **not** included on the hosted site
 
-### Subjects
+### Deploy checklist
 
-| Subject | Topics |
-|---|---:|
-| Science | 547 |
-| Mathematics | 503 |
-| English | 286 |
-| History | 90 |
-| Personal & Social Development | 88 |
-| Life Skills | 37 |
-| Computing | 21 |
-| Learning to Learn | 18 |
+1. Commit the app under `web/`, the workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml), and the **standard** lesson cache [`web/data/lessons-cache.json`](web/data/lessons-cache.json) (~3.5 MB).
+2. Push to `main` or `master` (or run the workflow manually).
+3. In the GitHub repo: **Settings → Pages → Source → GitHub Actions**.
+4. After the workflow succeeds, the site is at:
 
-## Files
+`https://<user>.github.io/<repo>/`
 
-All data lives in [`data/`](data/) as UTF-8 JSON. See [`schema/`](schema/) for JSON Schemas and [`manifest.json`](data/manifest.json) for counts + SHA-256 checksums.
+Do **not** commit `web/data/lessons-cache-personalized.json` (gitignored). It can contain a child’s name, pets, and likes for local use only.
 
-| File | What it holds |
-|---|---|
-| [`data/topics.json`](data/topics.json) | The micro-topics (graph **nodes**). |
-| [`data/dependencies.json`](data/dependencies.json) | Prerequisite **edges** (`topicId` depends on `prerequisiteId`). |
-| [`data/curriculum-standards.json`](data/curriculum-standards.json) | The source curriculum standards, grouped by curriculum. |
-| [`data/clusters.json`](data/clusters.json) | Parent-friendly domain summaries. |
-| [`data/manifest.json`](data/manifest.json) | Counts, per-subject breakdown, per-file checksums. |
+## Run locally (full generation + personalization)
 
-### A topic
+Locally you get Settings, Pregenerate, and Generate/Regenerate so an AI agent can create or refresh lessons and quizzes. Keys stay in the browser (`localStorage`) — never in env files or the repo.
 
-```json
-{
-  "id": "mt_N8CpN1EJrP",
-  "type": "CONCEPTUAL",
-  "subject": "English",
-  "domain": "Grammar & Punctuation",
-  "name": "Building sentences",
-  "description": "Understand that words combine to make sentences — a sentence expresses a complete thought…",
-  "ageRangeStart": 4,
-  "ageRangeEnd": 6,
-  "centrality": 0.257,
-  "evidence": [
-    "Distinguish between complete sentences and fragments",
-    "Compose a complete sentence with a subject and verb"
-  ],
-  "assessmentPrompt": "If {{name}} says something like \"The dog\", can they tell you that's not a complete sentence…?",
-  "standards": ["ccss-ela:L.K.1f", "uk-nc-2013:Eng.App2.Y1.Sent.1"]
-}
-```
-
-- `id` — stable identifier (`mt_…`), referenced by dependencies and by neighbours.
-- `standards` — keys into `curriculum-standards.json` (`"<curriculum-slug>:<code>"`).
-- `assessmentPrompt` — a natural-language check for the idea. Contains a `{{name}}` placeholder (the child's name); substitute or strip before display.
-
-### A dependency
-
-```json
-{ "topicId": "mt__00ZSLnB7p", "prerequisiteId": "mt_VBl1T1sFCM", "strength": "hard",
-  "reason": "Must understand vibrations make sound before finding volume patterns" }
-```
-
-`topicId` **depends on** `prerequisiteId`. Reverse the edge to get "unlocks".
-
-## Using it
-
-Pure data — no runtime, no dependencies. Load the JSON and go.
-
-```js
-import topics from './data/topics.json' with { type: 'json' };
-import deps from './data/dependencies.json' with { type: 'json' };
-
-const byId = new Map(topics.topics.map(t => [t.id, t]));
-const prereqs = deps.dependencies
-  .filter(d => d.topicId === 'mt_N8CpN1EJrP')
-  .map(d => byId.get(d.prerequisiteId).name);
-```
-
-Validate structure + referential integrity:
+1. Open **Settings → Learner profile** — child’s name, pets, and interests  
+2. Choose **Lesson cache → Personalized** for child-specific lessons, or **Standard** for the public cache  
+3. Generate one lesson, or use **Pregenerate** to batch the curriculum  
 
 ```bash
-node scripts/validate.mjs
+cd web
+npm install
+npm run prepare-data
+npm run dev
 ```
+
+See [`web/README.md`](web/README.md) for Settings details.
+
+After regenerating **standard** lessons, commit updates to `web/data/lessons-cache.json` so the hosted site picks them up. Personalized lessons stay on your machine.
+
+```bash
+# from repo root — static export → web/out
+npm run build:pages
+```
+
+## Taxonomy data
+
+Source JSON lives in [`data/`](data/):
+
+| File | Contents |
+|---|---|
+| [`data/topics.json`](data/topics.json) | Micro-topics (nodes) |
+| [`data/dependencies.json`](data/dependencies.json) | Prerequisite edges |
+| [`data/curriculum-standards.json`](data/curriculum-standards.json) | Source standards |
+| [`data/clusters.json`](data/clusters.json) | Domain summaries |
+| [`data/manifest.json`](data/manifest.json) | Counts + checksums |
+
+Validate:
+
+```bash
+npm run validate
+```
+
+## Security notes
+
+- No server-side AI keys. Local generation uses Settings → browser storage only.
+- `.env` / `.env.local` are gitignored; [`web/.env.example`](web/.env.example) is documentation only.
+- Personalized lesson cache and progress files are gitignored and stripped from Pages builds.
+- Never force-add ignored secret or personalized files.
+
+## Attribution
+
+If you use this dataset, cite it as in [`CITATION.cff`](CITATION.cff):
+
+> Marble Skill Taxonomy (v1) · © Generative Spark, Inc. (Marble) · https://withmarble.com · licensed under ODbL 1.0 (database) and CC BY-SA 4.0 (content). Authors: Guillaume Boniface-Chang; Generative Spark, Inc. (Marble).
+
+See [LICENSE](LICENSE), [LICENSE-CONTENT](LICENSE-CONTENT), and [PROVENANCE.md](PROVENANCE.md).
 
 ## License
 
-This dataset is **multi-licensed** — read this before you use or redistribute it.
-
 | Layer | License |
 |---|---|
-| **The database** — the collection, structure, IDs, topic↔topic and topic↔standard relationships | [**ODbL 1.0**](LICENSE) — free for research **and** commercial use, **attribution** required, **share-alike** (derivative *databases* must stay open under ODbL). |
-| **The textual content Marble authored** — topic `description`/`name`/`evidence`/`assessmentPrompt`, dependency `reason`s, cluster `summary`s | [**CC BY-SA 4.0**](LICENSE-CONTENT) — same spirit: attribution + share-alike. |
-| **`curriculum-standards.json`** — extracted from third-party frameworks | **Not** Marble's to relicense. Each source is under **its own upstream license** — see [**PROVENANCE.md**](PROVENANCE.md). |
+| Database (structure, IDs, relationships) | [ODbL 1.0](LICENSE) |
+| Marble-authored text content | [CC BY-SA 4.0](LICENSE-CONTENT) |
+| `curriculum-standards.json` | Upstream licenses — [PROVENANCE.md](PROVENANCE.md) |
 
-**Why share-alike + still commercial-friendly:** ODbL distinguishes a *derivative database* (extend/modify the taxonomy → must stay open) from a *produced work* (use it inside a product, model, or app → stays yours). So you can build a commercial product on this without open-sourcing your product; you only owe back improvements to the *taxonomy itself*.
-
-### Attribution
-
-Any use must credit:
-
-> Marble Skill Taxonomy (v1) · © Generative Spark, Inc. (Marble) · https://withmarble.com · licensed under ODbL 1.0 (database) and CC BY-SA 4.0 (content).
-
-Plus the upstream notices in [PROVENANCE.md](PROVENANCE.md) for any curriculum standards you use. See [CITATION.cff](CITATION.cff) for a formal citation.
-
-## What's *not* here
-
-Deliberately excluded from this release: semantic embeddings (derived, recomputable) and any per-child / user data (never published). See [CHANGELOG.md](CHANGELOG.md).
+Micro Lessons hosted site, AI-generated lessons & quizzes, and personalized child lessons © [Kei Sakai](https://kunani.dev) · [@KeiSakaiX](https://x.com/KeiSakaiX)

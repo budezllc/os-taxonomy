@@ -1,0 +1,229 @@
+.main {
+  display: grid;
+  gap: 1rem;
+}
+
+.hero,
+.section {
+  padding: 1.25rem 1.35rem;
+}
+
+.hero h1,
+.section h2 {
+  margin-top: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-xl);
+}
+
+.hero h1 {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.75rem, 2.8vw, 2.15rem);
+}
+
+.section h3 {
+  margin-bottom: 0.4rem;
+  font-size: var(--text-lg);
+}
+
+.section p,
+.tips li {
+  font-size: var(--text-sm);
+  line-height: var(--leading);
+}
+
+.tips li {
+  margin-bottom: 0.25rem;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1rem 0 0.25rem;
+}
+
+.form {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+  max-width: min(100%, 560px);
+}
+
+.form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.form label > span {
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.form input,
+.form select {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.7rem;
+  background: var(--bg-deep);
+  color: var(--ink);
+  font-weight: 400;
+  width: 100%;
+  max-width: 100%;
+}
+
+.form select {
+  cursor: pointer;
+}
+
+.keyRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.keyRow input {
+  flex: 1;
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 1.1rem;
+}
+
+.saved {
+  color: var(--complete);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.healthRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.healthRow .success-box,
+.healthRow .error-box {
+  flex: 1;
+  min-width: min(100%, 280px);
+  margin: 0;
+}
+
+.tips {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.tips ul {
+  margin-top: 0.35rem;
+  padding-left: 1.15rem;
+  color: var(--ink-muted);
+}
+
+.tips li {
+  margin-bottom: 0.4rem;
+}
+
+.tips code {
+  font-size: 0.9em;
+}
+
+.interestTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 1rem 0 0.75rem;
+  min-height: 2rem;
+  align-items: center;
+}
+
+.interestEmpty {
+  margin: 0;
+}
+
+.interestChip {
+  cursor: pointer;
+}
+
+.interestChip span {
+  opacity: 0.7;
+  font-size: 1.05em;
+  line-height: 1;
+}
+
+.interestAdd {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+  max-width: min(100%, 560px);
+  margin-bottom: 0.85rem;
+}
+
+.interestAdd input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.7rem;
+  background: var(--bg-deep);
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.suggestLabel {
+  margin: 0 0 0.35rem;
+  font-size: var(--text-sm);
+}
+
+.subhead {
+  margin: 1.35rem 0 0.35rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-lg);
+}
+
+.petAdd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: stretch;
+  max-width: min(100%, 560px);
+  margin: 0.75rem 0 0.25rem;
+}
+
+.petAdd input {
+  flex: 1;
+  min-width: 7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.7rem;
+  background: var(--bg-deep);
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.cacheModes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.cacheHint {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-sm);
+}
+
+.cacheHint code {
+  font-size: 0.9em;
+}

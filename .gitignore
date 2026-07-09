@@ -1,5 +1,37 @@
 node_modules/
 .DS_Store
 *.log
+
+# Secrets / local env — never commit
 .env
 .env.*
+!.env.example
+web/.env
+web/.env.local
+web/.env.*.local
+!web/.env.example
+
+# Next.js
+web/.next/
+web/out/
+web/.pages-stash/
+web/tsconfig.tsbuildinfo
+web/next-env.d.ts
+
+# Generated at build from repo data/ + web/data/lessons-cache.json
+web/public/data/*.json
+!web/public/data/.gitkeep
+
+# Personal progress (browser localStorage is source of truth)
+web/data/progress.json
+
+# Local personalized lessons (name/pets/likes) — never ship to Pages
+web/data/lessons-cache-personalized.json
+web/public/data/lessons-cache-personalized.json
+
+# Local tooling / scratch (not needed to host)
+.cursor/
+.firecrawl/
+.vscode/
+*.pem
+.vercel/

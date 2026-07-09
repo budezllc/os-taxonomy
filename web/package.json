@@ -1,0 +1,31 @@
+{
+  "name": "micro-lessons",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "node scripts/prepare-static-data.mjs",
+    "dev": "next dev",
+    "prebuild": "node scripts/prepare-static-data.mjs",
+    "build": "next build",
+    "build:pages": "node scripts/build-pages.mjs",
+    "start": "next start",
+    "lint": "eslint",
+    "prepare-data": "node scripts/prepare-static-data.mjs"
+  },
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.14.5",
+    "next": "16.2.10",
+    "openai": "^6.45.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "typescript": "^5"
+  }
+}
