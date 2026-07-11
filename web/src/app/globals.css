@@ -235,6 +235,50 @@ button {
   font-size: 0.92rem;
 }
 
+.site-footer-theme {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.15rem;
+}
+
+.theme-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.theme-toggle-icon:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+}
+
+.theme-toggle-icon:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.theme-toggle-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.theme-toggle-icon:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .panel {
   background: color-mix(in srgb, var(--panel) 92%, transparent);
   border: 1px solid var(--line);

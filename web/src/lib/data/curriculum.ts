@@ -8,11 +8,12 @@ import type {
 } from "@/lib/types";
 import { buildIndex, sortCurriculum, withStatus } from "@/lib/data/sort";
 import { readProgress } from "@/lib/progress";
-import { withBasePath, isStaticSite } from "@/lib/site";
+import { withBasePath, isPersonalizedSite, isStaticSite } from "@/lib/site";
 import {
   readLessonCacheMode,
   type LessonCacheMode,
 } from "@/lib/prefs";
+import { isTaxonomyFallbackLesson } from "@/lib/ai/lesson-meta";
 
 type TopicsFile = { topics: Topic[] };
 type DepsFile = { dependencies: Dependency[] };
@@ -27,6 +28,7 @@ const lessonsByMode: Partial<
 > = {};
 
 function activeMode(): LessonCacheMode {
+  if (isPersonalizedSite()) return "personalized";
   if (isStaticSite()) return "standard";
   return readLessonCacheMode();
 }
@@ -190,4 +192,30 @@ export function rememberLesson(lesson: LessonContent): void {
   void existing.then((cache) => {
     cache[lesson.topicId] = lesson;
   });
+}
+
+/** Cached lessons marked as taxonomy fallback that match optional filters. */
+export async function countTaxonomyFallbackLessons(
+  filter?: TopicFilter,
+): Promise<number> {
+  const index = await getIndex();
+  const cache = await loadLessonsCache();
+  return index.filter(
+    (n) =>
+      matchesFilter(n, filter) && isTaxonomyFallbackLesson(cache[n.id]),
+  ).length;
+}
+
+export async function listTaxonomyFallbackTopicIds(
+  filter?: TopicFilter,
+): Promise<string[]> {
+  const index = await getIndex();
+  const cache = await loadLessonsCache();
+  const sorted = sortCurriculum(
+    index.filter(
+      (n) =>
+        matchesFilter(n, filter) && isTaxonomyFallbackLesson(cache[n.id]),
+    ),
+  );
+  return sorted.map((n) => n.id);
 }

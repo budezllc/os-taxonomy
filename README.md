@@ -62,6 +62,19 @@ After regenerating **standard** lessons, commit updates to `web/data/lessons-cac
 npm run build:pages
 ```
 
+## Private LAN site (personalized lessons)
+
+Serve your child's personalized lessons on the home network via nginx in Docker — browse and quiz only, no AI in the container.
+
+1. Generate personalized lessons locally (`npm run dev` → Settings → Personalized)
+2. Build: `npm run build:private` (from `web/`)
+3. Docker: `docker build -f web/Dockerfile.private -t micro-lessons-private:latest .` (repo root)
+4. Deploy [`docker-compose.private.yml`](docker-compose.private.yml) manually in Portainer on Umbrel
+
+LAN URL: **`http://neotheone.local:8080`**
+
+See [`web/README.md`](web/README.md) for full Portainer steps and refresh workflow.
+
 ## Taxonomy data
 
 Source JSON lives in [`data/`](data/):

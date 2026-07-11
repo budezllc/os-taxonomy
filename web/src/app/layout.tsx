@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
 import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import "./globals.css";
 
 const sans = IBM_Plex_Sans({
@@ -73,6 +74,14 @@ export default function RootLayout({
               >
                 kunani.dev
               </a>
+              {" · "}
+              <a
+                href="https://github.com/budezllc/os-taxonomy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                GitHub
+              </a>
             </p>
             <p className="site-footer-cite">
               Data:{" "}
@@ -102,6 +111,9 @@ export default function RootLayout({
               (database) and CC BY-SA 4.0 (content). Authors: Guillaume
               Boniface-Chang; Generative Spark, Inc. (Marble).
             </p>
+            <div className="site-footer-theme">
+              <ThemeToggle variant="icon" />
+            </div>
           </footer>
         </div>
       </body>

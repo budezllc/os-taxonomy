@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/prepare-static-data.mjs",
+    "predev": "node scripts/ensure-dev-routes.mjs && node scripts/prepare-static-data.mjs",
     "dev": "next dev",
     "prebuild": "node scripts/prepare-static-data.mjs",
     "build": "next build",
     "build:pages": "node scripts/build-pages.mjs",
+    "build:private": "node scripts/build-private.mjs",
     "start": "next start",
     "lint": "eslint",
     "prepare-data": "node scripts/prepare-static-data.mjs"

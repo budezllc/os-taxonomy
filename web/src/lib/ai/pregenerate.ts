@@ -1,10 +1,18 @@
 import type { PregenerateJob, PregenerateRequest, Topic } from "@/lib/types";
-import { generateLesson } from "@/lib/ai/provider";
+import {
+  generateLesson,
+  generateLessonWithRetries,
+} from "@/lib/ai/provider";
+import {
+  FALLBACK_RETRY_COUNT,
+  isTaxonomyFallbackLesson,
+} from "@/lib/ai/lesson-meta";
 import {
   readAiConfig,
   readLearnerProfile,
   readLessonCacheMode,
 } from "@/lib/prefs";
+import { rememberLesson } from "@/lib/data/curriculum";
 
 export type ClientPregenerateCallbacks = {
   onUpdate: (job: PregenerateJob) => void;
@@ -61,19 +69,37 @@ export async function runClientPregenerate(
       const profile = readLearnerProfile();
       const cacheMode = readLessonCacheMode();
       const useProfile = cacheMode === "personalized";
-      const lesson = await generateLesson(topic, {
+      const aiOptions = {
         baseUrl: ai.baseUrl,
         apiKey: ai.apiKey,
         model: ai.model,
         childName: useProfile ? profile.childName : undefined,
         interests: useProfile ? profile.interests : undefined,
         pets: useProfile ? profile.pets : undefined,
-      });
+      };
+
+      let lesson;
+      if (req.onlyTaxonomyFallback) {
+        const { lesson: generated, attempts } = await generateLessonWithRetries(
+          topic,
+          aiOptions,
+          FALLBACK_RETRY_COUNT,
+        );
+        lesson = generated;
+        if (isTaxonomyFallbackLesson(lesson)) {
+          throw new Error(
+            `Still taxonomy fallback after ${attempts} attempt${attempts === 1 ? "" : "s"}`,
+          );
+        }
+      } else {
+        lesson = await generateLesson(topic, aiOptions);
+      }
+
       const res = await fetch(`/api/lessons/${topicId}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          force: req.force,
+          force: req.force || req.onlyTaxonomyFallback,
           lesson,
           cache: cacheMode,
         }),
@@ -82,6 +108,8 @@ export async function runClientPregenerate(
         const json = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(json.error || "Failed to cache lesson");
       }
+      const saved = (await res.json()) as { lesson?: typeof lesson };
+      if (saved.lesson) rememberLesson(saved.lesson);
       job.done += 1;
     } catch (err) {
       job.failed += 1;

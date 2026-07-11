@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { isStaticSite } from "@/lib/site";
+import { isBrowseOnlySite } from "@/lib/site";
 
 export function SiteNav() {
-  const staticSite = isStaticSite();
+  const browseOnly = isBrowseOnlySite();
   return (
     <nav className="nav">
       <Link href="/">Dashboard</Link>
-      {!staticSite && (
+      {!browseOnly && (
         <>
           <Link href="/pregenerate">Pregenerate</Link>
           <Link href="/settings">Settings</Link>

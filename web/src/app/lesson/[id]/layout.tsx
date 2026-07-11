@@ -3,7 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 export function generateStaticParams(): Array<{ id: string }> {
-  if (process.env.NEXT_PUBLIC_STATIC_SITE !== "true") {
+  const isExport =
+    process.env.NEXT_PUBLIC_STATIC_SITE === "true" ||
+    process.env.NEXT_PUBLIC_PERSONALIZED_SITE === "true";
+  if (!isExport) {
     return [];
   }
   try {

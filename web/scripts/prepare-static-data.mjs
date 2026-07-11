@@ -43,14 +43,21 @@ for (const { from, to, optionalEmpty } of copies) {
     }
     throw new Error(`Missing source file: ${from}`);
   }
-  // Pages / static export only ships the standard lesson cache.
-  if (
-    process.env.NEXT_PUBLIC_STATIC_SITE === "true" &&
-    to.endsWith("lessons-cache-personalized.json")
-  ) {
+  const isPages = process.env.NEXT_PUBLIC_STATIC_SITE === "true";
+  const isPrivate = process.env.NEXT_PUBLIC_PERSONALIZED_SITE === "true";
+
+  // GitHub Pages never ships personalized lessons.
+  if (isPages && to.endsWith("lessons-cache-personalized.json")) {
     fs.writeFileSync(to, "{}");
     console.log(`static site: empty personalized cache at ${path.relative(webRoot, to)}`);
     continue;
+  }
+
+  // Private static build requires the real personalized cache.
+  if (isPrivate && to.endsWith("lessons-cache-personalized.json") && !fs.existsSync(from)) {
+    throw new Error(
+      `Missing ${path.relative(webRoot, from)} — run npm run dev and generate personalized lessons first.`,
+    );
   }
   fs.copyFileSync(from, to);
   const mb = (fs.statSync(to).size / (1024 * 1024)).toFixed(2);

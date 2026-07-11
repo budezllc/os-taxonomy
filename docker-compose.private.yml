@@ -1,0 +1,7 @@
+services:
+  micro-lessons:
+    image: micro-lessons-private:latest
+    container_name: micro-lessons-private
+    restart: unless-stopped
+    ports:
+      - "8080:80"

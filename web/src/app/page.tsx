@@ -6,7 +6,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import type { TopicSummary } from "@/lib/types";
 import { readFilters, writeFilters } from "@/lib/prefs";
 import { listTopics } from "@/lib/data/curriculum";
-import { isStaticSite } from "@/lib/site";
+import { isBrowseOnlySite, isPersonalizedSite } from "@/lib/site";
 import { ProgressSync } from "@/components/ProgressSync";
 import styles from "./page.module.css";
 
@@ -32,7 +32,8 @@ const AGE_BANDS = [
 ] as const;
 
 export default function DashboardPage() {
-  const staticSite = isStaticSite();
+  const browseOnly = isBrowseOnlySite();
+  const personalizedSite = isPersonalizedSite();
   const [subjects, setSubjects] = useState<string[]>([]);
   const [subject, setSubject] = useState<string>("");
   const [ageIdx, setAgeIdx] = useState(0);
@@ -118,8 +119,10 @@ export default function DashboardPage() {
           <p className="muted">Micro-topics · age then prerequisites</p>
           <h1 className={styles.title}>Learn in order</h1>
           <p className={styles.lead}>
-            {staticSite
-              ? "Browse teachable ideas, take a quick quiz, and mark lessons complete. Progress stays in your browser."
+            {browseOnly
+              ? personalizedSite
+                ? "Browse personalized lessons, take a quick quiz, and mark lessons complete. Progress stays in your browser."
+                : "Browse teachable ideas, take a quick quiz, and mark lessons complete. Progress stays in your browser."
               : "Browse teachable ideas, generate a short tutorial with local or OpenAI-compatible AI, take a quick quiz, and mark lessons complete."}
           </p>
         </div>

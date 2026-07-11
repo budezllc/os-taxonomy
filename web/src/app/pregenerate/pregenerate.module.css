@@ -78,6 +78,10 @@
   font-weight: 500 !important;
 }
 
+.fallbackHint {
+  margin: 0;
+}
+
 .track {
   height: 10px;
   background: var(--bg-deep);

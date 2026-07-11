@@ -8,7 +8,7 @@ export const AI_DEFAULTS = {
   model: "google/gemma-4-12b-qat:2",
   /** Empty by default; local servers often need no key. */
   apiKey: "",
-  maxTokens: 1536,
+  maxTokens: 3072,
 } as const;
 
 export const AI_PRESETS = {

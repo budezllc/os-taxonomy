@@ -15,6 +15,7 @@ web/.env.*.local
 web/.next/
 web/out/
 web/.pages-stash/
+web/.private-stash/
 web/tsconfig.tsbuildinfo
 web/next-env.d.ts
 
@@ -28,6 +29,9 @@ web/data/progress.json
 # Local personalized lessons (name/pets/likes) — never ship to Pages
 web/data/lessons-cache-personalized.json
 web/public/data/lessons-cache-personalized.json
+
+# Private Docker image export (contains personalized lessons)
+micro-lessons-private.tar
 
 # Local tooling / scratch (not needed to host)
 .cursor/

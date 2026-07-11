@@ -11,6 +11,7 @@
     "dev": "npm run dev --prefix web",
     "build": "npm run build --prefix web",
     "build:pages": "npm run build:pages --prefix web",
+    "build:private": "npm run build:private --prefix web",
     "start": "npm run start --prefix web",
     "lint": "npm run lint --prefix web"
   }

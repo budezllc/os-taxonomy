@@ -60,7 +60,7 @@ export type Edge = {
 export const QuizQuestionSchema = z.object({
   id: z.string(),
   prompt: z.string(),
-  choices: z.array(z.string()).optional(),
+  choices: z.array(z.string()).min(3).max(4),
   answer: z.string(),
   explanation: z.string(),
 });
@@ -69,8 +69,8 @@ export const LessonContentSchema = z.object({
   topicId: z.string(),
   title: z.string(),
   ageBand: z.string(),
-  explanation: z.array(z.string()).min(1).max(3),
-  keyIdeas: z.array(z.string()).min(2).max(4),
+  explanation: z.array(z.string()).min(4).max(6),
+  keyIdeas: z.array(z.string()).min(2).max(6),
   quiz: z.object({
     questions: z.array(QuizQuestionSchema).min(1),
   }),
@@ -119,6 +119,8 @@ export type PregenerateRequest = {
   topicIds?: string[];
   limit?: number;
   force?: boolean;
+  /** Only process cached lessons whose model is taxonomy fallback. */
+  onlyTaxonomyFallback?: boolean;
 };
 
 export type PregenerateJob = {

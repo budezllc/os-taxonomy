@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { PregenerateJob, Topic } from "@/lib/types";
 import { runClientPregenerate } from "@/lib/ai/pregenerate";
-import { getTopic, listSubjects, listTopics } from "@/lib/data/curriculum";
+import { FALLBACK_RETRY_COUNT } from "@/lib/ai/lesson-meta";
+import {
+  countTaxonomyFallbackLessons,
+  getTopic,
+  listSubjects,
+  listTaxonomyFallbackTopicIds,
+  listTopics,
+} from "@/lib/data/curriculum";
 import { useAiConfig } from "@/components/ModelSelect";
 import styles from "./pregenerate.module.css";
 
@@ -15,6 +22,8 @@ export default function PregeneratePage() {
   const [ageEnd, setAgeEnd] = useState("");
   const [limit, setLimit] = useState("20");
   const [force, setForce] = useState(false);
+  const [onlyFallback, setOnlyFallback] = useState(false);
+  const [fallbackCount, setFallbackCount] = useState<number | null>(null);
   const [job, setJob] = useState<PregenerateJob | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
@@ -24,48 +33,79 @@ export default function PregeneratePage() {
     void listSubjects().then(setSubjects);
   }, []);
 
+  const filterParams = {
+    subject: subject || undefined,
+    ageStart: ageStart ? Number(ageStart) : undefined,
+    ageEnd: ageEnd ? Number(ageEnd) : undefined,
+  };
+
+  useEffect(() => {
+    if (!onlyFallback) {
+      setFallbackCount(null);
+      return;
+    }
+    let cancelled = false;
+    void countTaxonomyFallbackLessons(filterParams).then((count) => {
+      if (!cancelled) setFallbackCount(count);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [onlyFallback, subject, ageStart, ageEnd]);
+
   const start = async () => {
     setStarting(true);
     setError(null);
     setJob(null);
     try {
-      const { topics } = await listTopics({
-        subject: subject || undefined,
-        ageStart: ageStart ? Number(ageStart) : undefined,
-        ageEnd: ageEnd ? Number(ageEnd) : undefined,
-      });
-      let summaries = topics;
-      if (!force) {
-        summaries = summaries.filter((t) => !t.hasLesson);
+      let topicIds: string[];
+      if (onlyFallback) {
+        topicIds = await listTaxonomyFallbackTopicIds(filterParams);
+      } else {
+        const { topics } = await listTopics(filterParams);
+        let summaries = topics;
+        if (!force) {
+          summaries = summaries.filter((t) => !t.hasLesson);
+        }
+        topicIds = summaries.map((s) => s.id);
       }
+
       const lim = limit ? Number(limit) : undefined;
       if (lim != null && lim > 0) {
-        summaries = summaries.slice(0, lim);
+        topicIds = topicIds.slice(0, lim);
       }
-      if (!summaries.length) {
-        throw new Error("No topics to generate (all cached, or filters empty)");
+      if (!topicIds.length) {
+        throw new Error(
+          onlyFallback
+            ? "No taxonomy fallback lessons match filters"
+            : "No topics to generate (all cached, or filters empty)",
+        );
       }
 
       const topicsById = new Map<string, Topic>();
       await Promise.all(
-        summaries.map(async (s) => {
-          const topic = await getTopic(s.id);
-          if (topic) topicsById.set(s.id, topic);
+        topicIds.map(async (id) => {
+          const topic = await getTopic(id);
+          if (topic) topicsById.set(id, topic);
         }),
       );
 
       await runClientPregenerate(
         {
-          subject: subject || undefined,
-          ageStart: ageStart ? Number(ageStart) : undefined,
-          ageEnd: ageEnd ? Number(ageEnd) : undefined,
+          ...filterParams,
           limit: lim,
-          force,
+          force: force || onlyFallback,
+          onlyTaxonomyFallback: onlyFallback,
         },
-        summaries.map((s) => s.id),
+        topicIds,
         topicsById,
         { onUpdate: setJob },
       );
+
+      if (onlyFallback) {
+        const count = await countTaxonomyFallbackLessons(filterParams);
+        setFallbackCount(count);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to start");
     } finally {
@@ -141,33 +181,65 @@ export default function PregeneratePage() {
             type="checkbox"
             checked={force}
             onChange={(e) => setForce(e.target.checked)}
+            disabled={onlyFallback}
           />
           Regenerate even if cached
         </label>
+        <label className={styles.check}>
+          <input
+            type="checkbox"
+            checked={onlyFallback}
+            onChange={(e) => setOnlyFallback(e.target.checked)}
+          />
+          Only taxonomy fallback lessons
+        </label>
+        {onlyFallback && (
+          <p className={`muted ${styles.fallbackHint}`}>
+            {fallbackCount == null
+              ? "Counting taxonomy fallbacks…"
+              : fallbackCount === 0
+                ? "No cached taxonomy fallback lessons match these filters."
+                : `${fallbackCount} taxonomy fallback lesson${fallbackCount === 1 ? "" : "s"} to process (retries up to ${FALLBACK_RETRY_COUNT} times each until AI succeeds).`}
+          </p>
+        )}
         {error && <div className="error-box">{error}</div>}
         <button
           type="button"
           className="btn btn-primary"
-          disabled={starting || job?.status === "running"}
+          disabled={
+            starting ||
+            job?.status === "running" ||
+            (onlyFallback && fallbackCount === 0)
+          }
           onClick={() => void start()}
         >
           {starting
             ? "Starting…"
             : job?.status === "running"
               ? "Running…"
-              : "Start pregenerate"}
+              : onlyFallback
+                ? "Repair taxonomy fallbacks"
+                : "Start pregenerate"}
         </button>
       </section>
 
       {job && (
         <section className={`panel ${styles.job}`}>
           <h2>Job {job.id}</h2>
+          {onlyFallback && (
+            <p className="muted">
+              Taxonomy fallback repair · {job.total} to process
+            </p>
+          )}
           <p>
             Status: <strong>{job.status}</strong>
             {job.currentTopicId ? ` · current ${job.currentTopicId}` : ""}
           </p>
           <p>
             Done {job.done} · Failed {job.failed} · Total {job.total}
+            {onlyFallback && fallbackCount != null && job.status !== "running"
+              ? ` · ${fallbackCount} fallback${fallbackCount === 1 ? "" : "s"} remaining in cache`
+              : ""}
           </p>
           <div className={styles.track}>
             <div className={styles.fill} style={{ width: `${pct}%` }} />

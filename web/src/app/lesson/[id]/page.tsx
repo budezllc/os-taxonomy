@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import type { Edge, LessonContent, Topic } from "@/lib/types";
-import { generateLesson } from "@/lib/ai/provider";
+import { generateLesson, repairLessonContent } from "@/lib/ai/provider";
 import { useAiConfig } from "@/components/ModelSelect";
 import { readLearnerProfile, readLessonCacheMode } from "@/lib/prefs";
 import {
@@ -15,7 +15,7 @@ import {
   rememberLesson,
 } from "@/lib/data/curriculum";
 import { readProgress, setProgressComplete } from "@/lib/progress";
-import { isStaticSite } from "@/lib/site";
+import { isBrowseOnlySite, isPersonalizedSite } from "@/lib/site";
 import styles from "./lesson.module.css";
 
 type Phase = "tutorial" | "quiz" | "results";
@@ -24,7 +24,8 @@ export default function LessonPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const router = useRouter();
-  const staticSite = isStaticSite();
+  const browseOnly = isBrowseOnlySite();
+  const personalizedSite = isPersonalizedSite();
 
   const [topic, setTopic] = useState<Topic | null>(null);
   const [prerequisites, setPrerequisites] = useState<Edge[]>([]);
@@ -50,7 +51,7 @@ export default function LessonPage() {
       ]);
       setTopic(t);
       setPrerequisites(prereqs);
-      setLesson(cached);
+      setLesson(cached ? repairLessonContent(cached, t) : null);
       setComplete(Boolean(readProgress()[id]));
       setPhase("tutorial");
       setAnswers({});
@@ -82,7 +83,7 @@ export default function LessonPage() {
   }, [topic, id]);
 
   const generate = async (force = false) => {
-    if (!topic || staticSite) return;
+    if (!topic || browseOnly) return;
     setGenerating(true);
     setError(null);
     try {
@@ -175,13 +176,15 @@ export default function LessonPage() {
 
       {!lesson && (
         <section className={`panel ${styles.fallback}`}>
-          <h2>{staticSite ? "Lesson not available" : "Before AI generates"}</h2>
+          <h2>{browseOnly ? "Lesson not available" : "Before AI generates"}</h2>
           <p className="muted">
-            {staticSite
-              ? "This topic does not have a pre-generated lesson in the published cache yet. You can still review mastery criteria below."
+            {browseOnly
+              ? personalizedSite
+                ? "This topic does not have a lesson in your personalized cache yet. You can still review mastery criteria below."
+                : "This topic does not have a pre-generated lesson in the published cache yet. You can still review mastery criteria below."
               : "You can still review mastery criteria below. Configure AI in Settings, then generate a full tutorial + quiz."}
           </p>
-          {!staticSite && (
+          {!browseOnly && (
             <div className={styles.actions}>
               <button
                 type="button"
@@ -250,9 +253,9 @@ export default function LessonPage() {
                   <h3>
                     {i + 1}. {q.prompt}
                   </h3>
-                  {q.choices?.length ? (
+                  {(q.choices ?? []).length > 1 ? (
                     <div className={styles.choices}>
-                      {q.choices.map((c) => (
+                      {(q.choices ?? []).map((c) => (
                         <label key={c} className={styles.choice}>
                           <input
                             type="radio"
@@ -342,7 +345,7 @@ export default function LessonPage() {
               Generated {new Date(lesson.generatedAt).toLocaleString()} · model{" "}
               {lesson.model}
             </p>
-            {!staticSite && (
+            {!browseOnly && (
               <button
                 type="button"
                 className="btn secondary"
